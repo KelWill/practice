@@ -11,7 +11,7 @@ function isAdult (entityType: EntityType) {
 
 function onlyTakesStudents(entityType: "student") {}
 
-function doSomething (entityType: EntityType) {
+function doThing (entityType: EntityType) {
   if (isAdult(entityType)) {
     // do nothing
   } else {

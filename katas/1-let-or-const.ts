@@ -13,6 +13,10 @@ let method = "GET";
 type Hint2 = typeof method;
 doSomething({method});
 
+let method2 = "GET" as const
+type Hint3 = typeof method2;
+doSomething({ method: method2 });
+
 // why does this last one work?
 doSomething({method: "GET"});
 
