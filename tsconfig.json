@@ -20,6 +20,6 @@
     "noImplicitAny": true,
     "typeRoots": ["./typings", "./node_modules/@types"]
   },
-  "include": ["katas/*"],
+  "include": ["katas.ts"],
   "exclude": ["node_modules"]
 }

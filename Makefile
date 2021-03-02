@@ -7,16 +7,5 @@
 # > ONESHELL: "all the lines in [a] recipe [will] be passed to a single invocation of the shell"
 .ONESHELL:
 
-watch: node_modules run
-	@fswatch ./katas/** | xargs -n 1 ./scripts/run-kata-for-file.sh
-
-run:
-	@ls ./katas/** | xargs -n 1 ./scripts/run-kata-for-file.sh
-
 node_modules: package.json yarn.lock
 	yarn --pure-lockfile
-
-lint-fix:
-	./node_modules/.bin/prettier --write ./katas
-	./node_modules/.bin/eslint --fix --ext .ts
-
