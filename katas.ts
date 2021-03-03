@@ -21,8 +21,10 @@ let method2 = "GET" as const
 type Hint3 = typeof method2;
 doSomething({ method: method2 });
 
-// why does this last one work?
+// why does these last variations work?
 doSomething({method: "GET"});
+const method3 = "GET";
+doSomething({method: method3});
 
 /* ----------------------- narrowing ------------------------- */
 
@@ -49,7 +51,7 @@ function renderEntity (entity: Entity) {
 }
 const teacher: Teacher = renderEntity({type: "teacher"});
 
-// how would you solve this with generics?
+// could you instead solve this using generics? i.e. `renderEntityWithGenerics<T> (entity: Entity)`
 function renderEntityWithGenerics (entity: Entity) {
   return entity;
 }
@@ -57,16 +59,16 @@ function renderEntityWithGenerics (entity: Entity) {
 const parent: Parent = renderEntityWithGenerics({type: "parent"});
 
 // make sure you're still enforcing that this function only works for Teachers or Parents
+// hint: you'll want to constrain the generic T using the 'extends' keyword
 // @ts-expect-error
 const notAnEntity = renderEntityWithGenerics({type: "not an entity"});
 
 type SchoolLeader = Teacher & {role: "school_leader"};
-// update this function to make the if statement narrow properly :)
+// update this function to make the if statement narrow properly :) ("is")
 function isSchoolLeader (teacher: Teacher) {
   return teacher.role === "school_leader";
 }
 const maybeSchoolLeader: Teacher = {type: "teacher", role: "school_leader"};
-
 if (isSchoolLeader(maybeSchoolLeader)) {
   const schoolLeader: SchoolLeader = maybeSchoolLeader;
 }
@@ -81,8 +83,7 @@ function asEmail (emailAddress: string) {
 type EmailAddress = string & {__brand: true};
 const email: EmailAddress = asEmail("email@classdojo.com");
 
-
-
+// next level: how would you set up a `Brand<T, Name>` that allows branding arbitrary strings or numbers?
 
 /* ----------------------------- function utilities ------------------------ */
 // https://www.typescriptlang.org/docs/handbook/utility-types.html Parameters, typeof, ReturnType
@@ -103,17 +104,17 @@ const createSpyFunctionPreservingTypes = <T extends AnyFunction>(fn: T) => {
 }
 
 const stringFunction = (key: string) => key;
-const numberFunction = (n: number) => n;
-
-// as expected, calling fn with a 
 // @ts-expect-error
 stringFunction(1);
 
+
+const numberFunction = (n: number) => n;
 // @ts-expect-error
 numberFunction("string");
 
-// notice that the starting type is `(...args: any[]) => any`
+
 const spiedStringFunction = createSpyFunctionPreservingTypes(stringFunction)
+type SpyHint = typeof spiedStringFunction;
 // @ts-expect-error
 spiedStringFunction(1)
 
