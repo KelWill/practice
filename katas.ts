@@ -17,14 +17,19 @@ let method = "GET";
 type Hint2 = typeof method;
 doSomething({method});
 
+
 let method2 = "GET" as const
 type Hint3 = typeof method2;
 doSomething({ method: method2 });
 
-// why does these last variations work?
+// why do the following versions work?
 doSomething({method: "GET"});
+
 const method3 = "GET";
 doSomething({method: method3});
+
+const optionsWorking: DontUseThisTypeToFix = {method: "PUT"};
+doSomething(optionsWorking);
 
 /* ----------------------- typing functions ------------------------- */
 // https://www.typescriptlang.org/docs/handbook/functions.html#overloads
