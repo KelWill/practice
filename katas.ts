@@ -26,20 +26,16 @@ doSomething({method: "GET"});
 const method3 = "GET";
 doSomething({method: method3});
 
-/* ----------------------- narrowing ------------------------- */
-
+/* ----------------------- typing functions ------------------------- */
 // https://www.typescriptlang.org/docs/handbook/functions.html#overloads
-// https://www.typescriptlang.org/docs/handbook/2/narrowing.html
-// we don't always help typescript do type narrowing in our codebase
-// and it often leads to code that looks like `as unknown as X`
-// that's almost always a sign that we've screwed up our types somehow
 
 function swapStringsAndNumbers (a: string | number) {
   if (typeof a === "string") return parseInt(a);
   return a.toLocaleString();
 }
-// how do we get n to show up as a number?
-const n: number = swapStringsAndNumbers("a");
+// how do we get n to show up as a number? don't use `as number`
+const n: number = swapStringsAndNumbers("100");
+const s: string = swapStringsAndNumbers(1000);
 
 type Teacher = { type: "teacher", role?: string };
 type Parent = { type: "parent" };
@@ -56,12 +52,17 @@ function renderEntityWithGenerics (entity: Entity) {
   return entity;
 }
 
-const parent: Parent = renderEntityWithGenerics({type: "parent"});
+const parent2: Parent = renderEntityWithGenerics({type: "parent"});
 
 // make sure you're still enforcing that this function only works for Teachers or Parents
 // hint: you'll want to constrain the generic T using the 'extends' keyword
-// @ts-expect-error
 const notAnEntity = renderEntityWithGenerics({type: "not an entity"});
+
+/* ----------------------- narrowing ------------------------- */
+// https://www.typescriptlang.org/docs/handbook/2/narrowing.html
+// we don't always help typescript do type narrowing in our codebase
+// and it often leads to code that looks like `as unknown as X`
+// that's almost always a sign that we've screwed up our types somehow
 
 type SchoolLeader = Teacher & {role: "school_leader"};
 // update this function to make the if statement narrow properly :) ("is")
@@ -73,14 +74,13 @@ if (isSchoolLeader(maybeSchoolLeader)) {
   const schoolLeader: SchoolLeader = maybeSchoolLeader;
 }
 
-// we'll sometimes use `Brand<Type, 'name'>` in our codebase. how would you set up a function that uses a branded string?
-// under the hood, that's basically setting the type to `string & {__super_secret: "brand type of this thing"}`
-// or `number & {__super_secret: "a number with special characteristics"}
+/* ----------------------- brands ------------------------- */
+// why would we want an "impossible" type like this EmailAddress?
+type EmailAddress = string & {__brand: true};
 function asEmail (emailAddress: string) {
   if (!emailAddress.includes("@")) throw new Error("not an email");
   return emailAddress;
 }
-type EmailAddress = string & {__brand: true};
 const email: EmailAddress = asEmail("email@classdojo.com");
 
 // next level: how would you set up a `Brand<T, Name>` that allows branding arbitrary strings or numbers?
@@ -104,17 +104,18 @@ const createSpyFunctionPreservingTypes = <T extends AnyFunction>(fn: T) => {
 }
 
 const stringFunction = (key: string) => key;
-// @ts-expect-error
+
+// this is erroring the way it should!
 stringFunction(1);
 
-
 const numberFunction = (n: number) => n;
-// @ts-expect-error
+// same here! we want to see this error
 numberFunction("string");
 
 
 const spiedStringFunction = createSpyFunctionPreservingTypes(stringFunction)
 type SpyHint = typeof spiedStringFunction;
+// how do we make sure this errors the same way as above?
 // @ts-expect-error
 spiedStringFunction(1)
 
@@ -133,14 +134,12 @@ class HowCanWeGetTimeoutType {
   }
 }
 
-
 /* ----------------------------- type utilities ------------------------ */
 
 // https://www.typescriptlang.org/docs/handbook/utility-types.html
 // it's a little hard to contstruct nicely failing tests here
 // and it's worth reading the utility types carefully! they're useful :)
 type EntityType = "teacher" | "parent" | "school_leader" | "student";
-
 
 // how do you type the return type by manipulating `EntityType`?
 function isAdult (entityType: EntityType) {
@@ -157,17 +156,13 @@ function doThing (entityType: EntityType) {
   }
 }
 
-
 /* ----------------------------- what's next?? ------------------------ */
 
 // https://github.com/type-challenges/type-challenges has an amazing set of challenges
-// they show you how to do things like the challenge below:
 
+/* --------------------- INFERRED STRING TYPE CHALLENGES ------------------- */
 // https://www.typescriptlang.org/docs/handbook/2/template-literal-types.html
 // Conditional Types: https://www.typescriptlang.org/docs/handbook/2/conditional-types.html
-
-// update me to get this working!
-// the final type should look like:
 type GoalType = {
   studentId: string,
   classId: string,
