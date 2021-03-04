@@ -159,6 +159,7 @@ function doThing (entityType: EntityType) {
 /* ----------------------------- what's next?? ------------------------ */
 
 // https://github.com/type-challenges/type-challenges has an amazing set of challenges
+// https://www.amazon.com/Effective-TypeScript-Specific-Ways-Improve/dp/1492053740/ has some good actionable advice
 
 /* --------------------- INFERRED STRING TYPE CHALLENGES ------------------- */
 // https://www.typescriptlang.org/docs/handbook/2/template-literal-types.html
