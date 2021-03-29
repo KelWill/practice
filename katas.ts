@@ -90,6 +90,76 @@ const email: EmailAddress = asEmail("email@classdojo.com");
 
 // next level: how would you set up a `Brand<T, Name>` that allows branding arbitrary strings or numbers?
 
+
+
+/* ----------------------- interface vs type ------------------------- */
+
+// so, what is the difference between an 'interface' and a 'type'?
+
+/*
+
+interface:
+  - can be extended `interface X extends Y {}`
+  - can be augmented by declaring the interface again
+  ```
+    interface A {}
+    interface A {
+      extraProp: string;
+    }
+  ```
+  - useful for libraries, or typing a method like `console.plog` that augments something that already exists (https://github.com/classdojo/api/blob/1261a407440dbbfe10bda43a327d6d1468145df5/src/console.ts#L69)
+  - has "strict" index signatures
+    if you set up `inferface A {a: 1}`, it doesn't infer the "index signature" of A, so it doesn't know that it'd be usable by something that takes something indexed by strings
+
+type:
+  - is an "alias" for a shape
+  - "extended" by creating a new type alias: `type B = Omit<A, C>;`
+  - cannot be augmented without creating a new type `type B = A & { extraProp: string }`
+
+useful discussion: https://github.com/microsoft/TypeScript/issues/15300#issuecomment-332366024
+
+in general, use 'type' for internal shapes (i.e. shapes within API), and 'interface' for library types that may need be augmented in a different codebase
+
+*/
+
+// what shape should A be?
+const a: AugmentedInterface = {};
+
+interface AugmentedInterface {}
+interface AugmentedInterface {
+  extraProp: string;
+}
+interface AugmentedInterface {
+  anotherProp: boolean;
+}
+
+
+
+interface LimitOptions {
+  limit: number;
+}
+declare function takesDict (options: Record<string, number>): void;
+const limitOptions: LimitOptions = {limit: 2};
+takesDict(limitOptions)
+
+
+interface QueryOptions extends LimitOptions {
+  sort: 1 | -1;
+}
+// going in the other direction, an interface taking a type alias does work!
+type QueryOptionsType = {
+  limit: number,
+  sort: 1 | -1,
+}
+declare function takesInterface (options: QueryOptions): void;
+const queryOptions: QueryOptionsType = {
+  limit: 3,
+  sort: -1,
+};
+takesInterface(queryOptions);
+
+
+
 /* ----------------------------- function utilities ------------------------ */
 // https://www.typescriptlang.org/docs/handbook/utility-types.html Parameters, typeof, ReturnType
 
@@ -139,67 +209,6 @@ class HowCanWeGetTimeoutType {
   }
 }
 
-/* ---------------- interface vs type ----------------- */
-// so, what is the difference between an 'interface' and a 'type'?
-
-/*
-interface:
-  - can be extended `interface X extends Y {}`
-  - can be augmented by declaring the interface again
-  ```
-    interface A {}
-    interface A {
-      extraProp: string;
-    }
-  ```
-  - useful for libraries, or typing a method like `console.plog` that augments the default (https://github.com/classdojo/api/blob/1261a407440dbbfe10bda43a327d6d1468145df5/src/console.ts#L69)
-  - has "strict" index signatures
-    if you set up `inferface A {a: 1}`, it doesn't infer the "index signature" of A, so it doesn't know that it'd be usable by something that takes something indexed by strings
-type:
-  - is an "alias" for a shape
-  - "extended" by creating a new type alias: `type B = Omit<A, C>;`
-  - cannot be augmented without creating a new type `type B = A & { extraProp: string }`
-
-useful discussion: https://github.com/microsoft/TypeScript/issues/15300#issuecomment-332366024
-
-** in general, use 'type' for internal shapes (i.e. shapes within API), and 'interface' for library types that may need be augmented in a different codebase **
-*/
-
-// what shape should A be?
-const a: AugmentedInterface = {};
-
-interface AugmentedInterface {}
-interface AugmentedInterface {
-  extraProp: string;
-}
-interface AugmentedInterface {
-  anotherProp: boolean;
-}
-
-
-
-interface LimitOptions {
-  limit: number;
-}
-declare function takesDict (options: Record<string, number>): void;
-const limitOptions: LimitOptions = {limit: 2};
-takesDict(limitOptions)
-
-
-interface QueryOptions extends LimitOptions {
-  sort: 1 | -1;
-}
-// going in the other direction, an interface taking a type alias does work!
-type QueryOptionsType = {
-  limit: number,
-  sort: 1 | -1,
-}
-declare function takesInterface (options: QueryOptions): void;
-const queryOptions: QueryOptionsType = {
-  limit: 3,
-  sort: -1,
-};
-takesInterface(queryOptions);
 
 
 
