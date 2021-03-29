@@ -4,7 +4,7 @@
 // the way typescript calculates a type isn't always quite what you expect
 // where do we sometimes see errors like this? why do we sometimes need `as const` in your codebase?
 
-function doSomething (o: DontUseThisTypeToFix) {}
+function doSomething(o: DontUseThisTypeToFix) { }
 type DontUseThisTypeToFix = {
   method: "GET" | "PUT"
 }
@@ -15,7 +15,7 @@ doSomething(options);
 
 let method = "GET";
 type Hint2 = typeof method;
-doSomething({method});
+doSomething({ method });
 
 
 let method2 = "GET" as const
@@ -23,12 +23,12 @@ type Hint3 = typeof method2;
 doSomething({ method: method2 });
 
 // why do the following versions work?
-doSomething({method: "GET"});
+doSomething({ method: "GET" });
 
 const method3 = "GET";
-doSomething({method: method3});
+doSomething({ method: method3 });
 
-const optionsWorking: DontUseThisTypeToFix = {method: "PUT"};
+const optionsWorking: DontUseThisTypeToFix = { method: "PUT" };
 doSomething(optionsWorking);
 
 /* ----------------------- typing functions ------------------------- */
@@ -39,24 +39,24 @@ type Parent = { type: "parent" };
 type Entity = Teacher | Parent;
 
 // how do set up `renderEntity` to preserve the type of its input?
-function renderEntityWithGenerics (entity: Entity) {
+function renderEntityWithGenerics(entity: Entity) {
   return entity;
 }
-const teacher: Teacher = renderEntityWithGenerics({type: "teacher"});
+const teacher: Teacher = renderEntityWithGenerics({ type: "teacher" });
 
 // make sure this errors!
-renderEntityWithGenerics({type: "not an entity"});
+renderEntityWithGenerics({ type: "not an entity" });
 
 // could you solve this without using generics and using multiple function definitions?
-function renderEntityWithMultipleDefinitions (entity: Entity) {
+function renderEntityWithMultipleDefinitions(entity: Entity) {
   return entity;
 }
-const parent2: Parent = renderEntityWithMultipleDefinitions({type: "parent"});
+const parent2: Parent = renderEntityWithMultipleDefinitions({ type: "parent" });
 
 // make sure this errors!
-const notAnEntity = renderEntityWithMultipleDefinitions({type: "not an entity"});
+const notAnEntity = renderEntityWithMultipleDefinitions({ type: "not an entity" });
 
-function swapStringsAndNumbers (a: string | number){
+function swapStringsAndNumbers(a: string | number) {
   if (typeof a === "string") return parseInt(a);
   return a.toLocaleString();
 }
@@ -71,20 +71,20 @@ const s: string = swapStringsAndNumbers(1000);
 // that's almost always a sign that we've screwed up our types somehow
 // in general, if you're often writing `as Y` or using `!`, you may not be narrowing types correctly
 
-type SchoolLeader = Teacher & {role: "school_leader"};
+type SchoolLeader = Teacher & { role: "school_leader" };
 // update this function to make the if statement narrow properly :) ("is")
-function isSchoolLeader (teacher: Teacher) {
+function isSchoolLeader(teacher: Teacher) {
   return teacher.role === "school_leader";
 }
-const maybeSchoolLeader: Teacher = {type: "teacher", role: "school_leader"};
+const maybeSchoolLeader: Teacher = { type: "teacher", role: "school_leader" };
 if (isSchoolLeader(maybeSchoolLeader)) {
   const schoolLeader: SchoolLeader = maybeSchoolLeader;
 }
 
 /* ----------------------- brands ------------------------- */
 // why would we want an "impossible" type like this EmailAddress?
-type EmailAddress = string & {__secret_brand: "email address"};
-function asEmail (emailAddress: string) {
+type EmailAddress = string & { __secret_brand: "email address" };
+function asEmail(emailAddress: string) {
   if (!emailAddress.includes("@")) throw new Error("not an email");
   return emailAddress;
 }
@@ -127,7 +127,7 @@ in general, use 'type' for internal shapes (i.e. shapes within API), and 'interf
 // what shape should A be?
 const a: AugmentedInterface = {};
 
-interface AugmentedInterface {}
+interface AugmentedInterface { }
 interface AugmentedInterface {
   extraProp: string;
 }
@@ -140,25 +140,38 @@ interface AugmentedInterface {
 interface LimitOptions {
   limit: number;
 }
-declare function takesDict (options: Record<string, number>): void;
-const limitOptions: LimitOptions = {limit: 2};
+declare function takesDict(options: Record<string, number>): void;
+const limitOptions: LimitOptions = { limit: 2 };
 takesDict(limitOptions)
+
+interface GeneralInterface {
+  [key: string]: number;
+}
+interface MoreSpecificInterface {
+  myKey: number;
+}
+
+const specific: MoreSpecificInterface = { myKey: 1 };
+const general: GeneralInterface = specific;
 
 
 interface QueryOptions extends LimitOptions {
   sort: 1 | -1;
 }
 // going in the other direction, an interface taking a type alias does work!
+// adapted from https://github.com/microsoft/TypeScript/issues/15300#issuecomment-371353444
 type QueryOptionsType = {
   limit: number,
   sort: 1 | -1,
 }
-declare function takesInterface (options: QueryOptions): void;
+declare function takesInterface(options: QueryOptions): void;
 const queryOptions: QueryOptionsType = {
   limit: 3,
   sort: -1,
 };
 takesInterface(queryOptions);
+
+
 
 
 
@@ -201,7 +214,7 @@ type TimeoutRef = "fix me without importing any types :)";
 class HowCanWeGetTimeoutType {
   private timeoutRef: TimeoutRef;
 
-  constructor () {
+  constructor() {
     this.timeoutRef = setImmediate(() => {
       console.log("well done!");
     })
@@ -218,13 +231,13 @@ class HowCanWeGetTimeoutType {
 type EntityType = "teacher" | "parent" | "school_leader" | "student";
 
 // how do you type the return type by manipulating `EntityType`?
-function isAdult (entityType: EntityType) {
+function isAdult(entityType: EntityType) {
   return ["teacher", "parent", "school_leader"].includes(entityType);
 }
 
-function onlyTakesStudents(entityType: "student") {}
+function onlyTakesStudents(entityType: "student") { }
 
-function doThing (entityType: EntityType) {
+function doThing(entityType: EntityType) {
   if (isAdult(entityType)) {
     // do nothing
   } else {
