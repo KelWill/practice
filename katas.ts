@@ -34,40 +34,42 @@ doSomething(optionsWorking);
 /* ----------------------- typing functions ------------------------- */
 // https://www.typescriptlang.org/docs/handbook/functions.html#overloads
 
-function swapStringsAndNumbers (a: string | number) {
-  if (typeof a === "string") return parseInt(a);
-  return a.toLocaleString();
-}
-// how do we get n to show up as a number? don't use `as number`
-const n: number = swapStringsAndNumbers("100");
-const s: string = swapStringsAndNumbers(1000);
-
 type Teacher = { type: "teacher", role?: string };
 type Parent = { type: "parent" };
 type Entity = Teacher | Parent;
 
-// how do set up `renderEntity` to preserve the type of its input? no using generics!
-function renderEntity (entity: Entity) {
-  return entity;
-}
-const teacher: Teacher = renderEntity({type: "teacher"});
-
-// could you instead solve this using generics? i.e. `renderEntityWithGenerics<T> (entity: Entity)`
+// how do set up `renderEntity` to preserve the type of its input?
 function renderEntityWithGenerics (entity: Entity) {
   return entity;
 }
+const teacher: Teacher = renderEntityWithGenerics({type: "teacher"});
 
-const parent2: Parent = renderEntityWithGenerics({type: "parent"});
+// make sure this errors!
+renderEntityWithGenerics({type: "not an entity"});
 
-// make sure you're still enforcing that this function only works for Teachers or Parents
-// hint: you'll want to constrain the generic T using the 'extends' keyword
-const notAnEntity = renderEntityWithGenerics({type: "not an entity"});
+// could you solve this without using generics and using multiple function definitions?
+function renderEntityWithMultipleDefinitions (entity: Entity) {
+  return entity;
+}
+const parent2: Parent = renderEntityWithMultipleDefinitions({type: "parent"});
+
+// make sure this errors!
+const notAnEntity = renderEntityWithMultipleDefinitions({type: "not an entity"});
+
+function swapStringsAndNumbers (a: string | number){
+  if (typeof a === "string") return parseInt(a);
+  return a.toLocaleString();
+}
+// how do we get n to autmoatically show up as a number? (don't use `as number`)
+const n: number = swapStringsAndNumbers("100");
+const s: string = swapStringsAndNumbers(1000);
 
 /* ----------------------- narrowing ------------------------- */
 // https://www.typescriptlang.org/docs/handbook/2/narrowing.html
 // we don't always help typescript do type narrowing in our codebase
 // and it often leads to code that looks like `as unknown as X`
 // that's almost always a sign that we've screwed up our types somehow
+// in general, if you're often writing `as Y` or using `!`, you may not be narrowing types correctly
 
 type SchoolLeader = Teacher & {role: "school_leader"};
 // update this function to make the if statement narrow properly :) ("is")
@@ -81,14 +83,14 @@ if (isSchoolLeader(maybeSchoolLeader)) {
 
 /* ----------------------- brands ------------------------- */
 // why would we want an "impossible" type like this EmailAddress?
-type EmailAddress = string & {__brand: true};
+type EmailAddress = string & {__secret_brand: "email address"};
 function asEmail (emailAddress: string) {
   if (!emailAddress.includes("@")) throw new Error("not an email");
   return emailAddress;
 }
 const email: EmailAddress = asEmail("email@classdojo.com");
 
-// next level: how would you set up a `Brand<T, Name>` that allows branding arbitrary strings or numbers?
+// extra credit: how would you set up a `Brand<T, Name>` that allows branding arbitrary strings or numbers?
 
 
 
@@ -190,11 +192,8 @@ numberFunction("string");
 
 const spiedStringFunction = createSpyFunctionPreservingTypes(stringFunction)
 type SpyHint = typeof spiedStringFunction;
-// how do we make sure this errors the same way as above?
-// @ts-expect-error
-spiedStringFunction(1)
 
-// @ts-expect-error
+spiedStringFunction(1)
 createSpyFunctionPreservingTypes(numberFunction)("string")
 
 
@@ -208,7 +207,6 @@ class HowCanWeGetTimeoutType {
     })
   }
 }
-
 
 
 
