@@ -2,7 +2,7 @@
 
 // https://www.typescriptlang.org/docs/handbook/variable-declarations.html
 // the way typescript calculates a type isn't always quite what you expect
-// where do we sometimes see errors like this? why do we sometimes need `as const` in your codebase?
+// where do we sometimes see errors like this? why do we sometimes need `as const` in our codebase?
 
 function doSomething(o: DontUseThisTypeToFix) { }
 type DontUseThisTypeToFix = {
@@ -144,6 +144,8 @@ declare function takesDict(options: Record<string, number>): void;
 const limitOptions: LimitOptions = { limit: 2 };
 takesDict(limitOptions)
 
+// general vs. specific is adapted from https://github.com/microsoft/TypeScript/issues/15300#issuecomment-371353444
+// there are some great examples in that comment!
 interface GeneralInterface {
   [key: string]: number;
 }
@@ -155,19 +157,21 @@ const specific: MoreSpecificInterface = { myKey: 1 };
 const general: GeneralInterface = specific;
 
 
+
+// going in the other direction, an interface taking a type alias does work!
 interface QueryOptions extends LimitOptions {
   sort: 1 | -1;
 }
-// going in the other direction, an interface taking a type alias does work!
-// adapted from https://github.com/microsoft/TypeScript/issues/15300#issuecomment-371353444
 type QueryOptionsType = {
   limit: number,
   sort: 1 | -1,
+  extraParameterNotInInterface: string,
 }
 declare function takesInterface(options: QueryOptions): void;
 const queryOptions: QueryOptionsType = {
   limit: 3,
   sort: -1,
+  extraParameterNotInInterface: "hello"
 };
 takesInterface(queryOptions);
 
