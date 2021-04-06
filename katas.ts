@@ -10,16 +10,13 @@ type DontUseThisTypeToFix = {
 }
 
 const options = { method: "GET" }
-type Hint = typeof options;
 doSomething(options);
 
 let method = "GET";
-type Hint2 = typeof method;
 doSomething({ method });
 
 
 let method2 = "GET" as const
-type Hint3 = typeof method2;
 doSomething({ method: method2 });
 
 // why do the following versions work?
@@ -31,6 +28,20 @@ doSomething({ method: method3 });
 const optionsWorking: DontUseThisTypeToFix = { method: "PUT" };
 doSomething(optionsWorking);
 
+/* ----------------------- what does 'as' do? ----------------------- */
+// every time you use "as" you're telling the type system "I KNOW BETTER THAN YOU DO"
+// and you normally don't!
+
+// how do we make this error correctly??
+type Greeting = "hello" | "hey";
+const notHello = "farewell" as Greeting;
+declare function takesGreeting (s: Greeting): void;
+takesGreeting(notHello);
+
+// scary, huh?
+// using 'as' is dangerous!
+const notATeacher = {} as Teacher;
+
 /* ----------------------- typing functions ------------------------- */
 // https://www.typescriptlang.org/docs/handbook/functions.html#overloads
 
@@ -39,7 +50,7 @@ type Parent = { type: "parent" };
 type Entity = Teacher | Parent;
 
 // how do set up `renderEntity` to preserve the type of its input?
-function renderEntityWithGenerics(entity: Entity) {
+function renderEntityWithGenerics<T extends Entity>(entity: Entity) {
   return entity;
 }
 const teacher: Teacher = renderEntityWithGenerics({ type: "teacher" });
