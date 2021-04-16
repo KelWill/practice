@@ -125,10 +125,6 @@ class AuroraTimeoutError extends Error {
 
 function getResponseFromError(err: NotFoundError | NotAllowedAccessError | AuroraTimeoutError | Error): { status: number, body?: string } {
 
-  if (!err.type) {
-    return { status: 500, body: "internal server error" };
-  }
-
   if (err.type === "AuroraTimeout") {
     return { status: 500, body: `aurora timed out: ${!!err.table ? err.table : "unknown table"}` }
   }
@@ -139,6 +135,10 @@ function getResponseFromError(err: NotFoundError | NotAllowedAccessError | Auror
 
   if (err.type === "NotFound") {
     return { status: 404, body: "not found" };
+  }
+
+  if (!err.type) {
+    return { status: 500, body: "internal server error" };
   }
 
   throw new Error(`Unknown error type ${err.type}`);
