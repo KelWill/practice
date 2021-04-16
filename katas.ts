@@ -38,47 +38,10 @@ const notHello = "farewell" as Greeting;
 declare function takesGreeting(s: Greeting): void;
 takesGreeting(notHello);
 
-
 // scary, huh?
 // using 'as' is dangerous!
 const notATeacher = {} as Teacher;
 
-
-
-
-
-/* ----------------------- typing functions ------------------------- */
-// https://www.typescriptlang.org/docs/handbook/functions.html#overloads
-
-type Teacher = { type: "teacher", role?: string };
-type Parent = { type: "parent" };
-type Entity = Teacher | Parent;
-
-// how do set up `renderEntity` to preserve the type of its input?
-function renderEntityWithGenerics<T extends Entity>(entity: Entity) {
-  return entity;
-}
-const teacher: Teacher = renderEntityWithGenerics({ type: "teacher" });
-
-// make sure this errors!
-renderEntityWithGenerics({ type: "not an entity" });
-
-// could you solve this without using generics and using multiple function definitions?
-function renderEntityWithMultipleDefinitions(entity: Entity) {
-  return entity;
-}
-const parent2: Parent = renderEntityWithMultipleDefinitions({ type: "parent" });
-
-// make sure this errors!
-const notAnEntity = renderEntityWithMultipleDefinitions({ type: "not an entity" });
-
-function swapStringsAndNumbers(a: string | number) {
-  if (typeof a === "string") return parseInt(a);
-  return a.toLocaleString();
-}
-// how do we get n to autmoatically show up as a number? (don't use `as number`)
-const n: number = swapStringsAndNumbers("100");
-const s: string = swapStringsAndNumbers(1000);
 
 /* ----------------------- narrowing ------------------------- */
 // https://www.typescriptlang.org/docs/handbook/2/narrowing.html
@@ -95,6 +58,7 @@ function isSchoolLeader(teacher: Teacher) {
 const maybeSchoolLeader: Teacher = { type: "teacher", role: "school_leader" };
 if (isSchoolLeader(maybeSchoolLeader)) {
   const schoolLeader: SchoolLeader = maybeSchoolLeader;
+  console.log("school_leader", schoolLeader);
 }
 
 class NotFoundError extends Error {
@@ -145,6 +109,39 @@ function getResponseFromError(err: NotFoundError | NotAllowedAccessError | Auror
 }
 
 
+/* ----------------------- typing functions to handle multiple input types ------------------------- */
+// https://www.typescriptlang.org/docs/handbook/functions.html#overloads
+
+type Teacher = { type: "teacher", role?: string };
+type Parent = { type: "parent" };
+type Entity = Teacher | Parent;
+
+// how do set up `renderEntity` to preserve the type of its input?
+function renderEntityWithGenerics<T extends Entity>(entity: Entity) {
+  return entity;
+}
+const teacher: Teacher = renderEntityWithGenerics({ type: "teacher" });
+
+// make sure this errors!
+renderEntityWithGenerics({ type: "not an entity" });
+
+// could you solve this without using generics and using multiple function definitions?
+function renderEntityWithMultipleDefinitions(entity: Entity) {
+  return entity;
+}
+const parent2: Parent = renderEntityWithMultipleDefinitions({ type: "parent" });
+
+// make sure this errors!
+const notAnEntity = renderEntityWithMultipleDefinitions({ type: "not an entity" });
+
+function swapStringsAndNumbers(a: string | number) {
+  if (typeof a === "string") return parseInt(a);
+  return a.toLocaleString();
+}
+// how do we get n to autmoatically show up as a number? (don't use `as number`)
+const n: number = swapStringsAndNumbers("100");
+const s: string = swapStringsAndNumbers(1000);
+
 
 /* ----------------------- brands ------------------------- */
 // why would we want an "impossible" type like this EmailAddress?
@@ -156,7 +153,6 @@ function asEmail(emailAddress: string) {
 const email: EmailAddress = asEmail("email@classdojo.com");
 
 // extra credit: how would you set up a `Brand<T, Name>` that allows branding arbitrary strings or numbers?
-
 
 
 /* ----------------------- interface vs type ------------------------- */
