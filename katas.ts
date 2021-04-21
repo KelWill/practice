@@ -1,4 +1,4 @@
-/* ----------------------------- let or const ------------------------ */
+/* ----------------------------- simple type inference ------------------------ */
 
 // https://www.typescriptlang.org/docs/handbook/variable-declarations.html
 // the way typescript calculates a type isn't always quite what you expect
@@ -33,7 +33,6 @@ doSomething({ method: method3 });
 
 
 /* ----------------------- array type inference ------------------------ */
-/* ----------------------------- Arrays of Objects with dynamic keys ------------------------ */
 // shoutout to Chris for this section!!
 
 const mixedArray = ["string", 2]; 
