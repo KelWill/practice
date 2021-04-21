@@ -79,7 +79,7 @@ const notATeacher = {} as Teacher;
 /* ----------------------- narrowing ------------------------- */
 // https://www.typescriptlang.org/docs/handbook/2/narrowing.html
 // we don't always help typescript do type narrowing in our codebase
-// and it often leads to code that looks like `as unknown as X`
+// and it often leads to code with lots of "as X" or "if ((z as X).type === "foo")..."
 // that's almost always a sign that we've screwed up our types somehow
 // in general, if you're often writing `as Y` or using `!`, you may not be narrowing types correctly
 
