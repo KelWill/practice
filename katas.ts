@@ -44,6 +44,9 @@ mixedArray.push(new Date());
 // what ways do we have to tell typescript we have a different type in mind?
 const mixedObjectArray = [{a: 1}, {b: 1}];
 
+// why does this error?
+mixedObjectArray.push({c: 1});
+
 type IndexFields = Record<string, number>;
 
 // Function accepts an array of objects with dynamic keys
@@ -71,8 +74,6 @@ takesGreeting(notHello);
 // scary, huh?
 // using 'as' is dangerous!
 const notATeacher = {} as Teacher;
-
-
 
 
 
@@ -122,7 +123,6 @@ class AuroraTimeoutError extends Error {
 
 // how could we change this function to type it nicely?
 function getResponseFromError(err: NotFoundError | NotAllowedAccessError | AuroraTimeoutError | Error): { status: number, body?: string } {
-
   if (err.type === "AuroraTimeout") {
     return { status: 500, body: `aurora timed out: ${!!err.table ? err.table : "unknown table"}` }
   }
