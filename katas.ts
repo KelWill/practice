@@ -238,7 +238,53 @@ takesInterface(queryOptions);
 
 
 
+/* ----------------------------- Arrays of Objects with dynamic keys ------------------------ */
 
+type IndexFields = Record<string, number>;
+
+// Function accepts an array of objects with dynamic keys
+declare function printIndexFields(indexFields: IndexFields[]): void;
+
+// These entries happen to have the same keys
+const sameKeys = [{
+  fieldOne: 1
+}, {
+  fieldOne: 1
+}];
+
+printIndexFields(sameKeys);
+
+// Different keys across the entries work if we pass in the array as a literal
+printIndexFields([{
+  fieldOne: 1
+}, {
+  fieldTwo: 1
+}]);
+
+// These entries have different keys, but still _seem_ to match the interface...
+const differentKeys = [{
+  fieldOne: 1
+}, {
+  fieldTwo: 1
+}];
+
+
+// Why doesn't it work when when we pass it as a variable?
+printIndexFields(differentKeys);
+
+
+// Hint: Check out Typescript's error message for _this one_:
+const lotsOfKeys = [{
+  fieldOne: 1
+}, {
+  fieldTwo: 1
+}, {
+  fieldThree: 1
+}, {
+  fieldFour: 1
+}];
+
+printIndexFields(lotsOfKeys);
 
 /* ----------------------------- function utilities ------------------------ */
 // https://www.typescriptlang.org/docs/handbook/utility-types.html Parameters, typeof, ReturnType
