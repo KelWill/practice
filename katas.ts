@@ -9,24 +9,54 @@ type DontUseThisTypeToFix = {
   method: "GET" | "PUT"
 }
 
+// these work
+const optionsWorking: DontUseThisTypeToFix = { method: "PUT" };
+doSomething(optionsWorking);
+doSomething({ method: "GET" });
+
+// but this doesn't
+// why?
 const options = { method: "GET" }
 doSomething(options);
 
+// this also fails. what's going on?
 let method = "GET";
 doSomething({ method });
 
-
+// but this works
 let method2 = "GET" as const
 doSomething({ method: method2 });
 
-// why do the following versions work?
-doSomething({ method: "GET" });
-
+// as does this
 const method3 = "GET";
 doSomething({ method: method3 });
 
-const optionsWorking: DontUseThisTypeToFix = { method: "PUT" };
-doSomething(optionsWorking);
+
+/* ----------------------- array type inference ------------------------ */
+/* ----------------------------- Arrays of Objects with dynamic keys ------------------------ */
+// shoutout to Chris for this section!!
+
+const mixedArray = ["string", 2]; 
+// why does this error?
+mixedArray.push(new Date());
+
+// what type do we end up with here? (hover over `mixedObjectArray`)
+// what ways do we have to tell typescript we have a different type in mind?
+const mixedObjectArray = [{a: 1}, {b: 1}];
+
+type IndexFields = Record<string, number>;
+
+// Function accepts an array of objects with dynamic keys
+declare function takesIndexFields(indexFields: IndexFields[]): void;
+
+// this fails
+takesIndexFields(mixedObjectArray);
+// but this works. why?
+takesIndexFields([{
+  a: 1
+}, {
+  b: 1
+}]);
 
 /* ----------------------- what does 'as' do? ----------------------- */
 // every time you use "as" you're telling the type system "I KNOW BETTER THAN YOU DO"
@@ -41,6 +71,9 @@ takesGreeting(notHello);
 // scary, huh?
 // using 'as' is dangerous!
 const notATeacher = {} as Teacher;
+
+
+
 
 
 /* ----------------------- narrowing ------------------------- */
@@ -87,6 +120,7 @@ class AuroraTimeoutError extends Error {
   }
 }
 
+// how could we change this function to type it nicely?
 function getResponseFromError(err: NotFoundError | NotAllowedAccessError | AuroraTimeoutError | Error): { status: number, body?: string } {
 
   if (err.type === "AuroraTimeout") {
@@ -217,8 +251,6 @@ interface MoreSpecificInterface {
 const specific: MoreSpecificInterface = { myKey: 1 };
 const general: GeneralInterface = specific;
 
-
-
 // going in the other direction, an interface taking a type alias does work!
 interface QueryOptions extends LimitOptions {
   sort: 1 | -1;
@@ -238,53 +270,7 @@ takesInterface(queryOptions);
 
 
 
-/* ----------------------------- Arrays of Objects with dynamic keys ------------------------ */
 
-type IndexFields = Record<string, number>;
-
-// Function accepts an array of objects with dynamic keys
-declare function printIndexFields(indexFields: IndexFields[]): void;
-
-// These entries happen to have the same keys
-const sameKeys = [{
-  fieldOne: 1
-}, {
-  fieldOne: 1
-}];
-
-printIndexFields(sameKeys);
-
-// Different keys across the entries work if we pass in the array as a literal
-printIndexFields([{
-  fieldOne: 1
-}, {
-  fieldTwo: 1
-}]);
-
-// These entries have different keys, but still _seem_ to match the interface...
-const differentKeys = [{
-  fieldOne: 1
-}, {
-  fieldTwo: 1
-}];
-
-
-// Why doesn't it work when when we pass it as a variable?
-printIndexFields(differentKeys);
-
-
-// Hint: Check out Typescript's error message for _this one_:
-const lotsOfKeys = [{
-  fieldOne: 1
-}, {
-  fieldTwo: 1
-}, {
-  fieldThree: 1
-}, {
-  fieldFour: 1
-}];
-
-printIndexFields(lotsOfKeys);
 
 /* ----------------------------- function utilities ------------------------ */
 // https://www.typescriptlang.org/docs/handbook/utility-types.html Parameters, typeof, ReturnType
@@ -374,52 +360,3 @@ const params: GetParameters<"/api/dojoClass/:classId/student/:studentId"> = {
   "studentId": "123",
   "classId": "456",
 }
-
-
-type IndexFields = Record<string, number | undefined>;
-
-// Function accepts an array of objects with dynamic keys
-declare function printIndexFields(indexFields: IndexFields[]): void;
-
-// These entries happen to have the same keys
-const sameKeys = [{
-  fieldOne: 1
-}, {
-  fieldOne: 1
-}];
-
-printIndexFields(sameKeys);
-
-// Different keys across the entries work if we pass in the array as a literal
-printIndexFields([{
-  fieldOne: 1
-}, {
-  fieldTwo: 1
-}]);
-
-// These entries have different keys, but still _seem_ to match the interface...
-const differentKeys = [{
-  fieldOne: 1
-}, {
-  fieldTwo: 1
-}];
-
-
-// Why doesn't it work when when we pass it as a variable?
-printIndexFields(differentKeys);
-
-
-
-
-// Hint: Check out Typescript's error message for _this one_:
-const lotsOfKeys = [{
-  fieldOne: 1
-}, {
-  fieldTwo: 1
-}, {
-  fieldThree: 1
-}, {
-  fieldFour: 1
-}];
-
-printIndexFields(lotsOfKeys);
