@@ -112,11 +112,11 @@ class NotAllowedAccessError extends Error {
 
 class AuroraTimeoutError extends Error {
   type: "AuroraTimeout";
-  tableName?: string;
-  constructor(tableName?: string) {
+  table?: string;
+  constructor(table?: string) {
     super();
     this.type = "AuroraTimeout";
-    this.tableName = tableName;
+    this.table = table;
   }
 }
 
