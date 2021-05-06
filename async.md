@@ -88,9 +88,9 @@ const update = (properties: TeacherUpdatePayload) => {
 ```
 
 
-### write custom promise
+### write a custom promise implementation
 
-Promises weren't originally part of js -- they got added in because people found promise libraries useful for dealing with async code.
+Promises weren't originally part of js -- they got added in because people found promise libraries useful for dealing with async code. You can write your own implmenetation! Make sure it handles chaining properly :)
 
 https://promisesaplus.com/
 
