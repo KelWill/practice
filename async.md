@@ -17,13 +17,14 @@ const getNamespaces = (cb) => {
       return cb(err);
     }
 
-    return cb(null, files.map((filename) => path.basename(filename, ".json")))
+    return cb(
+      null,
+      files.map((filename) => path.basename(filename, ".json"))
+    );
   });
 };
 
-const getNamespaceAsync = () => {
-  
-}
+const getNamespaceAsync = () => {};
 ```
 
 ```js
@@ -40,16 +41,13 @@ function onFinished(req, callback) {
     if (returned) return;
     returned = true;
     return callback(err);
-  })
+  });
 }
 
-async function untilFinished(req) {
-
-}
+async function untilFinished(req) {}
 ```
 
 - knowing how to do this manually is important, but on the backend you do have access to https://nodejs.org/api/util.html#util_util_promisify_original
-
 
 ### convert promises based function to async/await
 
@@ -58,24 +56,37 @@ const update = (properties: TeacherUpdatePayload) => {
   return updateUserObjectIfNeeded(properties)
     .then(() => updateNotificationSettingsIfNeeded(properties))
     .then(() => {
-      if (properties.locale != null && !localeValidator.test(properties.locale)) {
+      if (
+        properties.locale != null &&
+        !localeValidator.test(properties.locale)
+      ) {
         throw new Error(`invalid locale: ${properties.locale}`);
       }
 
-      const avatarBig = imageUrl(properties.avatarBig || _.get(_.get(properties._links, "avatarBig"), "href") || "");
+      const avatarBig = imageUrl(
+        properties.avatarBig ||
+          _.get(_.get(properties._links, "avatarBig"), "href") ||
+          ""
+      );
 
-      let title = properties.title && properties.title.substring(0, MAX_TITLE_LENGTH);
+      let title =
+        properties.title && properties.title.substring(0, MAX_TITLE_LENGTH);
       if (BAD_IOS_TITLE_STRING_SET.has(title)) {
         title = "";
       }
-      const firstName = properties.firstName && removeHtml(properties.firstName.substring(0, MAX_NAME_LENGTH));
-      const lastName = properties.lastName && removeHtml(properties.lastName.substring(0, MAX_NAME_LENGTH));
+      const firstName =
+        properties.firstName &&
+        removeHtml(properties.firstName.substring(0, MAX_NAME_LENGTH));
+      const lastName =
+        properties.lastName &&
+        removeHtml(properties.lastName.substring(0, MAX_NAME_LENGTH));
 
       return new TeacherQueryBuilder()
         .innerJoinOn("user_teacher")
         .innerJoinOn("user")
         .updateAndFind(properties._id, {
-          locale: properties.locale != null ? fix(properties.locale) : undefined,
+          locale:
+            properties.locale != null ? fix(properties.locale) : undefined,
           timezone: properties.timezone,
           photo: avatarBig,
           firstName,
@@ -84,9 +95,8 @@ const update = (properties: TeacherUpdatePayload) => {
           role: properties.role,
         });
     });
-}
+};
 ```
-
 
 ### write a custom promise implementation
 
@@ -96,20 +106,30 @@ https://promisesaplus.com/
 
 ```js
 class MyPromise {
-  constructor (cb) {
-  }
+  constructor(cb) {}
 }
+```
+
+### what will log?
+
+What are we going to log if we do the following? Why?
+
+```js
+(async function whatWillLog () {
+  try {
+    return Promise.reject();
+  } catch (err) {
+    console.log("catch 1");
+  }
+})().catch(() => console.log("catch 2"))
 ```
 
 ### write bluebird.delay without using async/await
 
 ```js
-function delay(ms) {
+function delay(ms) {}
 
-}
-
-async function test () {
-
+async function test() {
   for (let i = 0; i < 10; i++) {
     console.log(i);
     await delay(i * 1000);
@@ -120,16 +140,13 @@ async function test () {
 ### write Promise.all without using async/await
 
 ```js
-function PromiseAll (promises) {
+function PromiseAll(promises) {}
 
-}
-
-async function test () {
+async function test() {
   const promises = _.range(0, 100).map((n) => delay(1000).then(() => n));
   const results = await PromiseAll(promises);
   console.log(results); // [0, 1, ..., 99]
 }
-
 ```
 
 ### bug & bad pattern spotting
@@ -139,7 +156,10 @@ These are all real examples from our codebase. I think it's instructive to show 
 ```js
 flagProps = {};
 filterFlags.forEach(async (name) => {
-  flagProps[name] = await ServerSwitch.isOnForUserEntity(name, entity._id).catch(() => false);
+  flagProps[name] = await ServerSwitch.isOnForUserEntity(
+    name,
+    entity._id
+  ).catch(() => false);
 });
 ```
 
@@ -147,7 +167,10 @@ filterFlags.forEach(async (name) => {
 const homeStudentLevels: HomeStudentLevelInfo[] = [];
 
 await pMap(students, async (student) => {
-  const homeStudentLevelInfo = await renderHomeStudentLevelInfoByStudent(student._id, "parent");
+  const homeStudentLevelInfo = await renderHomeStudentLevelInfoByStudent(
+    student._id,
+    "parent"
+  );
   homeStudentLevels.push(homeStudentLevelInfo);
 });
 ```
@@ -155,17 +178,22 @@ await pMap(students, async (student) => {
 ```js
 const filterItemsForStudentInClass = async (
   items: Assignment.AssignmentObject[],
-  studentIds: MongoId[],
+  studentIds: MongoId[]
 ): Promise<Assignment.AssignmentObject[]> => {
   return await pFilter(items, async (item) => {
-    const isStudentInClass = await pMap(studentIds, (sid) => Class.hasStudents(item.classId, [sid]));
+    const isStudentInClass = await pMap(studentIds, (sid) =>
+      Class.hasStudents(item.classId, [sid])
+    );
     return _.some(isStudentInClass, Boolean);
   });
 };
 ```
 
 ```js
-const createIndividualNotification = async (blueshiftNotification: BlueShiftInAppMessage, entity: Entity) => {
+const createIndividualNotification = async (
+  blueshiftNotification: BlueShiftInAppMessage,
+  entity: Entity
+) => {
   const notification = formatBlueshiftNotification(blueshiftNotification);
   if (!notification) return null;
 
@@ -175,7 +203,7 @@ const createIndividualNotification = async (blueshiftNotification: BlueShiftInAp
       { _id: entity._id, type: "parent" },
       { type: "dojo" },
       { type: "blueshift" },
-      { ...notification, _id: new ObjectId().toString(), type: "blueshift" },
+      { ...notification, _id: new ObjectId().toString(), type: "blueshift" }
     );
 
     metrics.increment("blueshift.inapp.success");
@@ -254,6 +282,25 @@ export async function prepareForOutput(
   if (doc.deleted) awardObj.deleted = true;
 
   return awardObj;
+}
+```
+
+```ts
+async function _getUsage(
+  entityType: EntityType,
+  withUsageReport: boolean,
+  entityId: MongoId
+): Promise<UsageReport.UsageDetails | undefined> {
+  try {
+    if (entityType !== "teacher" || !withUsageReport) {
+      return {};
+    }
+
+    return await UsageReport.getUsageForTeacher(entityId);
+  } catch (err) {
+    if (err.NotFound || /Not found/.test(err.message)) return;
+    throw err;
+  }
 }
 ```
 
