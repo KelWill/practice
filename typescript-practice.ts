@@ -4,10 +4,10 @@
 // the way typescript calculates a type isn't always quite what you expect
 // where do we sometimes see errors like this? why do we sometimes need `as const` in our codebase?
 
-function doSomething(o: DontUseThisTypeToFix) { }
+function doSomething(o: DontUseThisTypeToFix) {}
 type DontUseThisTypeToFix = {
-  method: "GET" | "PUT"
-}
+  method: "GET" | "PUT";
+};
 
 // these work
 const optionsWorking: DontUseThisTypeToFix = { method: "PUT" };
@@ -16,7 +16,7 @@ doSomething({ method: "GET" });
 
 // but this doesn't
 // why?
-const options = { method: "GET" }
+const options = { method: "GET" };
 doSomething(options);
 
 // this also fails. what's going on?
@@ -24,27 +24,26 @@ let method = "GET";
 doSomething({ method });
 
 // but this works
-let method2 = "GET" as const
+let method2 = "GET" as const;
 doSomething({ method: method2 });
 
 // as does this
 const method3 = "GET";
 doSomething({ method: method3 });
 
-
 /* ----------------------- array type inference ------------------------ */
 // shoutout to Chris for this section!!
 
-const mixedArray = ["string", 2]; 
+const mixedArray = ["string", 2];
 // why does this error?
 mixedArray.push(new Date());
 
 // what type do we end up with here? (hover over `mixedObjectArray`)
 // what ways do we have to tell typescript we have a different type in mind?
-const mixedObjectArray = [{a: 1}, {b: 1}];
+const mixedObjectArray = [{ a: 1 }, { b: 1 }];
 
 // why does this error?
-mixedObjectArray.push({c: 1});
+mixedObjectArray.push({ c: 1 });
 
 type IndexFields = Record<string, number>;
 
@@ -54,11 +53,14 @@ declare function takesIndexFields(indexFields: IndexFields[]): void;
 // this fails
 takesIndexFields(mixedObjectArray);
 // but this works. why?
-takesIndexFields([{
-  a: 1
-}, {
-  b: 1
-}]);
+takesIndexFields([
+  {
+    a: 1,
+  },
+  {
+    b: 1,
+  },
+]);
 
 /* ----------------------- what does 'as' do? ----------------------- */
 // every time you use "as" you're telling the type system "I KNOW BETTER THAN YOU DO"
@@ -73,8 +75,6 @@ takesGreeting(notHello);
 // scary, huh?
 // using 'as' is dangerous!
 const notATeacher = {} as Teacher;
-
-
 
 /* ----------------------- narrowing ------------------------- */
 // https://www.typescriptlang.org/docs/handbook/2/narrowing.html
@@ -100,7 +100,7 @@ class NotFoundError extends Error {
     super();
     this.type = "NotFound";
   }
-};
+}
 
 class NotAllowedAccessError extends Error {
   type: "NoAccess";
@@ -121,9 +121,14 @@ class AuroraTimeoutError extends Error {
 }
 
 // how could we change this function to type it nicely?
-function getResponseFromError(err: NotFoundError | NotAllowedAccessError | AuroraTimeoutError | Error): { status: number, body?: string } {
+function getResponseFromError(
+  err: NotFoundError | NotAllowedAccessError | AuroraTimeoutError | Error
+): { status: number; body?: string } {
   if (err.type === "AuroraTimeout") {
-    return { status: 500, body: `aurora timed out: ${!!err.table ? err.table : "unknown table"}` }
+    return {
+      status: 500,
+      body: `aurora timed out: ${!!err.table ? err.table : "unknown table"}`,
+    };
   }
 
   if (err.type === "NoAccess") {
@@ -141,11 +146,10 @@ function getResponseFromError(err: NotFoundError | NotAllowedAccessError | Auror
   throw new Error(`Unknown error type ${err.type}`);
 }
 
-
 /* ----------------------- typing functions to handle multiple input types ------------------------- */
 // https://www.typescriptlang.org/docs/handbook/functions.html#overloads
 
-type Teacher = { type: "teacher", role?: string };
+type Teacher = { type: "teacher"; role?: string };
 type Parent = { type: "parent" };
 type Entity = Teacher | Parent;
 
@@ -165,7 +169,9 @@ function renderEntityWithMultipleDefinitions(entity: Entity) {
 const parent2: Parent = renderEntityWithMultipleDefinitions({ type: "parent" });
 
 // make sure this errors!
-const notAnEntity = renderEntityWithMultipleDefinitions({ type: "not an entity" });
+const notAnEntity = renderEntityWithMultipleDefinitions({
+  type: "not an entity",
+});
 
 function swapStringsAndNumbers(a: string | number) {
   if (typeof a === "string") return parseInt(a);
@@ -174,7 +180,6 @@ function swapStringsAndNumbers(a: string | number) {
 // how do we get n to autmoatically show up as a number? (don't use `as number`)
 const n: number = swapStringsAndNumbers("100");
 const s: string = swapStringsAndNumbers(1000);
-
 
 /* ----------------------- brands ------------------------- */
 // why would we want an "impossible" type like this EmailAddress?
@@ -186,7 +191,6 @@ function asEmail(emailAddress: string) {
 const email: EmailAddress = asEmail("email@classdojo.com");
 
 // extra credit: how would you set up a `Brand<T, Name>` that allows branding arbitrary strings or numbers?
-
 
 /* ----------------------- interface vs type ------------------------- */
 
@@ -221,7 +225,7 @@ in general, use 'type' for internal shapes (i.e. shapes within API), and 'interf
 // what shape should A be?
 const a: AugmentedInterface = {};
 
-interface AugmentedInterface { }
+interface AugmentedInterface {}
 interface AugmentedInterface {
   extraProp: string;
 }
@@ -229,14 +233,12 @@ interface AugmentedInterface {
   anotherProp: boolean;
 }
 
-
-
 interface LimitOptions {
   limit: number;
 }
 declare function takesDict(options: Record<string, number>): void;
 const limitOptions: LimitOptions = { limit: 2 };
-takesDict(limitOptions)
+takesDict(limitOptions);
 
 // general vs. specific is adapted from https://github.com/microsoft/TypeScript/issues/15300#issuecomment-371353444
 // there are some great examples in that comment!
@@ -255,21 +257,17 @@ interface QueryOptions extends LimitOptions {
   sort: 1 | -1;
 }
 type QueryOptionsType = {
-  limit: number,
-  sort: 1 | -1,
-  extraParameterNotInInterface: string,
-}
+  limit: number;
+  sort: 1 | -1;
+  extraParameterNotInInterface: string;
+};
 declare function takesInterface(options: QueryOptions): void;
 const queryOptions: QueryOptionsType = {
   limit: 3,
   sort: -1,
-  extraParameterNotInInterface: "hello"
+  extraParameterNotInInterface: "hello",
 };
 takesInterface(queryOptions);
-
-
-
-
 
 /* ----------------------------- function utilities ------------------------ */
 // https://www.typescriptlang.org/docs/handbook/utility-types.html Parameters, typeof, ReturnType
@@ -282,12 +280,12 @@ const createSpyFunctionPreservingTypes = <T extends AnyFunction>(fn: T) => {
   const spyFunction = (...args: any[]) => {
     callCount++;
     return fn(...args);
-  }
+  };
 
   spyFunction.getCallCount = () => callCount;
 
   return spyFunction;
-}
+};
 
 const stringFunction = (key: string) => key;
 
@@ -298,13 +296,11 @@ const numberFunction = (n: number) => n;
 // same here! we want to see this error
 numberFunction("string");
 
-
-const spiedStringFunction = createSpyFunctionPreservingTypes(stringFunction)
+const spiedStringFunction = createSpyFunctionPreservingTypes(stringFunction);
 type SpyHint = typeof spiedStringFunction;
 
-spiedStringFunction(1)
-createSpyFunctionPreservingTypes(numberFunction)("string")
-
+spiedStringFunction(1);
+createSpyFunctionPreservingTypes(numberFunction)("string");
 
 type TimeoutRef = "fix me without importing any types :)";
 class HowCanWeGetTimeoutType {
@@ -313,49 +309,164 @@ class HowCanWeGetTimeoutType {
   constructor() {
     this.timeoutRef = setImmediate(() => {
       console.log("well done!");
-    })
+    });
   }
 }
-
-
 
 /* ----------------------------- type utilities ------------------------ */
+{
+  // https://www.typescriptlang.org/docs/handbook/utility-types.html
+  // it's a little hard to contstruct nicely failing tests here
+  // and it's worth reading the utility types carefully! they're useful :)
+  type EntityType = "teacher" | "parent" | "school_leader" | "student";
 
-// https://www.typescriptlang.org/docs/handbook/utility-types.html
-// it's a little hard to contstruct nicely failing tests here
-// and it's worth reading the utility types carefully! they're useful :)
-type EntityType = "teacher" | "parent" | "school_leader" | "student";
+  // how do you type the return type by manipulating `EntityType`?
+  function isAdult(entityType: EntityType) {
+    return ["teacher", "parent", "school_leader"].includes(entityType);
+  }
 
-// how do you type the return type by manipulating `EntityType`?
-function isAdult(entityType: EntityType) {
-  return ["teacher", "parent", "school_leader"].includes(entityType);
+  function onlyTakesStudents(entityType: "student") {}
+
+  function doThing(entityType: EntityType) {
+    if (isAdult(entityType)) {
+      // do nothing
+    } else {
+      onlyTakesStudents(entityType);
+    }
+  }
 }
 
-function onlyTakesStudents(entityType: "student") { }
-
-function doThing(entityType: EntityType) {
-  if (isAdult(entityType)) {
-    // do nothing
-  } else {
-    onlyTakesStudents(entityType);
+/* ------------------------ exhaustive switch ------------------- */
+{
+  // https://stackoverflow.com/questions/39419170/how-do-i-check-that-a-switch-block-is-exhaustive-in-typescript
+  function assertImpossible(p: never): never {
+    throw new Error("INCONCEIVABLE!");
   }
+
+  type Method = "GET" | "PUT" | "POST" | "DELETE";
+
+  function handleMethod(method: Method) {
+    switch (method) {
+      case "GET":
+        return 1;
+      case "PUT":
+        return 2;
+      case "POST":
+        return 3;
+      default:
+        assertImpossible(method);
+    }
+  }
+
+  // stolen from https://stackoverflow.com/questions/39419170/how-do-i-check-that-a-switch-block-is-exhaustive-in-typescript
+  // Discriminated union using string literals
+  type Teacher = {
+    type: "teacher";
+    role: string;
+  };
+  type Parent = {
+    type: "parent";
+    children: Array<string>;
+  };
+  type StudentUser = {
+    type: "studentUser";
+    monster: string;
+  };
+  type Entity = Teacher | Parent | StudentUser;
+
+  function handleEntity(entity: Entity) {
+    switch (entity.type) {
+      case "teacher":
+        console.log(entity.role);
+        break;
+      case "parent":
+        console.log(entity.children.length);
+        break;
+      default:
+        assertImpossible(p);
+    }
+  }
+
+  function handleEntityWithIfStatements(entity: Entity) {
+    if (entity.type === "teacher") {
+      console.log(entity.role);
+    } else if (entity.type === "parent") {
+      console.log(entity.children);
+    } else {
+      assertImpossible(entity);
+    }
+
+    // we looked at this one earlier
+    // once we check that "type" exists within 'err', it's able to safely discriminate using the 'type' key
+    function getResponseFromError(
+      err: NotFoundError | NotAllowedAccessError | AuroraTimeoutError | Error
+    ): { status: number; body?: string } {
+      if (!("type" in err)) return;
+      if (err.type === "AuroraTimeout") {
+        return {
+          status: 500,
+          body: `aurora timed out: ${
+            !!err.table ? err.table : "unknown table"
+          }`,
+        };
+      }
+
+      if (err.type === "NoAccess") {
+        return { status: 403, body: "no access to that thing" };
+      }
+
+      if (err.type === "NotFound") {
+        return { status: 404, body: "not found" };
+      }
+
+      assertImpossible(err);
+    }
+  }
+}
+/* ------------------------ typeof, keyof, in, extends --------------------- */
+{
+  const objectWithKeys = { a: 1, b: 2, c: [1, 2, 3] };
+  type Ex1 = keyof typeof objectWithKeys;
+  type Ex2 = {
+    [key in keyof typeof objectWithKeys]: keyof [];
+  };
+
+  type Method = "GET" | "PUT" | "POST" | "DELETE";
+  type Handler = Record<Method, () => number>;
+  type Handler2 = {
+    [key in Method]: () => number;
+  };
+  const handler: Handler = {
+    GET: () => 1,
+    PUT: () => 2,
+    POST: () => 3,
+  };
+
+  // we _know_ handler has GET, PUT, POST, and DELETE as its keys
+  function getKeys<T extends Record<string, any>>(o: T) {
+    return Object.keys(handler);
+  }
+  // but keys isn't happy. How can we set up the return type of `getKeys` to preserve the type
+  // note: we'll have to override typescript in `getKeys`!
+  const keys: Method[] = getKeys(handler);
 }
 
 /* ----------------------------- what's next?? ------------------------ */
+{
+  // https://github.com/type-challenges/type-challenges has an amazing set of challenges
+  // https://www.amazon.com/Effective-TypeScript-Specific-Ways-Improve/dp/1492053740/ has some good actionable advice
 
-// https://github.com/type-challenges/type-challenges has an amazing set of challenges
-// https://www.amazon.com/Effective-TypeScript-Specific-Ways-Improve/dp/1492053740/ has some good actionable advice
+  /* --------------------- INFERRED STRING TYPE CHALLENGES ------------------- */
+  // https://www.typescriptlang.org/docs/handbook/2/template-literal-types.html
+  // Conditional Types: https://www.typescriptlang.org/docs/handbook/2/conditional-types.html
+  type GoalType = {
+    studentId: string;
+    classId: string;
+  };
+  type GetParameters<T extends string> = T;
 
-/* --------------------- INFERRED STRING TYPE CHALLENGES ------------------- */
-// https://www.typescriptlang.org/docs/handbook/2/template-literal-types.html
-// Conditional Types: https://www.typescriptlang.org/docs/handbook/2/conditional-types.html
-type GoalType = {
-  studentId: string,
-  classId: string,
-}
-type GetParameters<T extends string> = T;
-
-const params: GetParameters<"/api/dojoClass/:classId/student/:studentId"> = {
-  "studentId": "123",
-  "classId": "456",
+  const params: GetParameters<"/api/dojoClass/:classId/student/:studentId"> = {
+    studentId: "123",
+    classId: "456",
+  };
 }
