@@ -62,6 +62,19 @@ takesIndexFields([
   },
 ]);
 
+/* ----------------------- structural typing ------------------------- */
+
+type Cat = {
+  is_animal: true;
+};
+
+type Dog = {
+  is_animal: true;
+};
+
+const dog: Dog = { is_animal: true };
+const cat: Cat = dog;
+
 /* ----------------------- what does 'as' do? ----------------------- */
 // every time you use "as" you're telling the type system "I KNOW BETTER THAN YOU DO"
 // and you normally don't!
