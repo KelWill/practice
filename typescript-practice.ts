@@ -464,22 +464,13 @@ class HowCanWeGetTimeoutType {
   const keys: Method[] = getKeys(handler);
 }
 
-/* ----------------------------- what's next?? ------------------------ */
-{
-  // https://github.com/type-challenges/type-challenges has an amazing set of challenges
-  // https://www.amazon.com/Effective-TypeScript-Specific-Ways-Improve/dp/1492053740/ has some good actionable advice
+/* -------------------- NEXT LEVEL -------------------- */
 
-  /* --------------------- INFERRED STRING TYPE CHALLENGES ------------------- */
-  // https://www.typescriptlang.org/docs/handbook/2/template-literal-types.html
-  // Conditional Types: https://www.typescriptlang.org/docs/handbook/2/conditional-types.html
-  type GoalType = {
-    studentId: string;
-    classId: string;
-  };
-  type GetParameters<T extends string> = T;
+// https://github.com/type-challenges/type-challenges/blob/master/questions/4-easy-pick/README.md
+// https://github.com/type-challenges/type-challenges/blob/master/questions/11-easy-tuple-to-object/README.md
+// https://github.com/type-challenges/type-challenges/blob/master/questions/189-easy-awaited/README.md
 
-  const params: GetParameters<"/api/dojoClass/:classId/student/:studentId"> = {
-    studentId: "123",
-    classId: "456",
-  };
-}
+/* ----------------------------- more learning resources ------------------------ */
+
+// https://github.com/type-challenges/type-challenges has an amazing set of challenges
+// https://www.amazon.com/Effective-TypeScript-Specific-Ways-Improve/dp/1492053740/ has some good actionable advice
