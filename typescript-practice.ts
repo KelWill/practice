@@ -396,7 +396,7 @@ class HowCanWeGetTimeoutType {
         console.log(entity.children.length);
         break;
       default:
-        assertImpossible(p);
+        assertImpossible(entity);
     }
   }
 
