@@ -408,32 +408,29 @@ class HowCanWeGetTimeoutType {
     } else {
       assertImpossible(entity);
     }
-
-    // we looked at this one earlier
-    // once we check that "type" exists within 'err', it's able to safely discriminate using the 'type' key
-    function getResponseFromError(
-      err: NotFoundError | NotAllowedAccessError | AuroraTimeoutError | Error
-    ): { status: number; body?: string } {
-      if (!("type" in err)) return;
-      if (err.type === "AuroraTimeout") {
-        return {
-          status: 500,
-          body: `aurora timed out: ${
-            !!err.table ? err.table : "unknown table"
-          }`,
-        };
-      }
-
-      if (err.type === "NoAccess") {
-        return { status: 403, body: "no access to that thing" };
-      }
-
-      if (err.type === "NotFound") {
-        return { status: 404, body: "not found" };
-      }
-
-      assertImpossible(err);
+  }
+  // we looked at this one earlier
+  // once we check that "type" exists within 'err', it's able to safely discriminate using the 'type' key
+  function getResponseFromError2(
+    err: NotFoundError | NotAllowedAccessError | AuroraTimeoutError | Error
+  ): { status: number; body?: string } {
+    if (!("type" in err)) return { status: 500, body: err.message };
+    if (err.type === "AuroraTimeout") {
+      return {
+        status: 500,
+        body: `aurora timed out: ${!!err.table ? err.table : "unknown table"}`,
+      };
     }
+
+    if (err.type === "NoAccess") {
+      return { status: 403, body: "no access to that thing" };
+    }
+
+    if (err.type === "NotFound") {
+      return { status: 404, body: "not found" };
+    }
+
+    assertImpossible(err);
   }
 }
 /* ------------------------ typeof, keyof, in, extends --------------------- */
@@ -455,11 +452,12 @@ class HowCanWeGetTimeoutType {
     POST: () => 3,
   };
 
-  // we _know_ handler has GET, PUT, POST, and DELETE as its keys
-  function getKeys<T extends Record<string, any>>(o: T) {
+  function getKeys<T extends Record<string, any>>(o: T): Array<keyof T> {
     return Object.keys(handler);
   }
-  // but keys isn't happy. How can we set up the return type of `getKeys` to preserve the type
+
+  // we _know_ handler has GET, PUT, POST, and DELETE as its keys
+  // but `keys` isn't happy. How can we set up the return type of `getKeys` to preserve the type
   // note: we'll have to override typescript in `getKeys`!
   const keys: Method[] = getKeys(handler);
 }
@@ -472,5 +470,6 @@ class HowCanWeGetTimeoutType {
 
 /* ----------------------------- more learning resources ------------------------ */
 
+// https://artsy.github.io/blog/2018/11/21/conditional-types-in-typescript/ is a great introduction to conditional types
 // https://github.com/type-challenges/type-challenges has an amazing set of challenges
 // https://www.amazon.com/Effective-TypeScript-Specific-Ways-Improve/dp/1492053740/ has some good actionable advice
