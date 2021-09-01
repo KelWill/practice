@@ -452,7 +452,7 @@ class HowCanWeGetTimeoutType {
     POST: () => 3,
   };
 
-  function getKeys<T extends Record<string, any>>(o: T): Array<keyof T> {
+  function getKeys(o: Record<string, unknown>) {
     return Object.keys(handler);
   }
 
