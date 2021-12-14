@@ -285,25 +285,6 @@ export async function prepareForOutput(
 }
 ```
 
-```ts
-async function _getUsage(
-  entityType: EntityType,
-  withUsageReport: boolean,
-  entityId: MongoId
-): Promise<UsageReport.UsageDetails | undefined> {
-  try {
-    if (entityType !== "teacher" || !withUsageReport) {
-      return {};
-    }
-
-    return await UsageReport.getUsageForTeacher(entityId);
-  } catch (err) {
-    if (err.NotFound || /Not found/.test(err.message)) return;
-    throw err;
-  }
-}
-```
-
 ### other notes
 
 - https://github.com/classdojo/api/blob/master/src/util/deferred.ts is worth a look. why is this pattern useful?
