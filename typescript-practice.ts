@@ -282,74 +282,15 @@ const queryOptions: QueryOptionsType = {
 };
 takesInterface(queryOptions);
 
-/* ----------------------------- function utilities ------------------------ */
-// https://www.typescriptlang.org/docs/handbook/utility-types.html Parameters, typeof, ReturnType
-
-type AnyFunction = (...args: any[]) => any;
-const createSpyFunctionPreservingTypes = <T extends AnyFunction>(fn: T) => {
-  let callCount = 0;
-
-  // add types here to make the spied functions share the same types as the passed in function
-  const spyFunction = (...args: any[]) => {
-    callCount++;
-    return fn(...args);
-  };
-
-  spyFunction.getCallCount = () => callCount;
-
-  return spyFunction;
-};
-
-const stringFunction = (key: string) => key;
-
-// this is erroring the way it should!
-stringFunction(1);
-
-const numberFunction = (n: number) => n;
-// same here! we want to see this error
-numberFunction("string");
-
-const spiedStringFunction = createSpyFunctionPreservingTypes(stringFunction);
-type SpyHint = typeof spiedStringFunction;
-
-spiedStringFunction(1);
-createSpyFunctionPreservingTypes(numberFunction)("string");
-
-type TimeoutRef = "fix me without importing any types :)";
-class HowCanWeGetTimeoutType {
-  private timeoutRef: TimeoutRef;
-
-  constructor() {
-    this.timeoutRef = setImmediate(() => {
-      console.log("well done!");
-    });
-  }
-}
-
-/* ----------------------------- type utilities ------------------------ */
-{
-  // https://www.typescriptlang.org/docs/handbook/utility-types.html
-  // it's a little hard to contstruct nicely failing tests here
-  // and it's worth reading the utility types carefully! they're useful :)
-  type EntityType = "teacher" | "parent" | "school_leader" | "student";
-
-  // how do you type the return type by manipulating `EntityType`?
-  function isAdult(entityType: EntityType) {
-    return ["teacher", "parent", "school_leader"].includes(entityType);
-  }
-
-  function onlyTakesStudents(entityType: "student") {}
-
-  function doThing(entityType: EntityType) {
-    if (isAdult(entityType)) {
-      // do nothing
-    } else {
-      onlyTakesStudents(entityType);
-    }
-  }
-}
-
 /* ------------------------ exhaustive switch ------------------- */
+/*
+It's often important to make sure that every possible case is handled.
+That way, if you add another case in the future, TS will let you know that you need to go do some updates.
+
+`never` is useful here & for any other cases where you want to be sure that you get a nice error message. 
+One other common case is the type for empty object -- it should look like `Record<string, never>` rather than `{}`.
+*/
+
 {
   // https://stackoverflow.com/questions/39419170/how-do-i-check-that-a-switch-block-is-exhaustive-in-typescript
   function assertImpossible(p: never): never {
@@ -433,7 +374,26 @@ class HowCanWeGetTimeoutType {
     assertImpossible(err);
   }
 }
+
+/* ------------------------ keyof --------------------- */
+{
+  type UserConfig = {
+    seenX: boolean;
+    openedModal: boolean;
+    consentedToPrivacyPolicyAt?: Date;
+  };
+  type UserConfigKey = "seenX" | "openedModal" | "consentedToPrivacyPolicyAt";
+
+  async function updateUserConfig(
+    key: UserConfigKey,
+    value: boolean | Date
+  ): Promise<UserConfig> {
+    return {} as UserConfig;
+  }
+}
+
 /* ------------------------ typeof, keyof, in, extends --------------------- */
+
 {
   const objectWithKeys = { a: 1, b: 2, c: [1, 2, 3] };
   type Ex1 = keyof typeof objectWithKeys;
@@ -460,6 +420,84 @@ class HowCanWeGetTimeoutType {
   // but `keys` isn't happy. How can we set up the return type of `getKeys` to preserve the type
   // note: we'll have to override typescript in `getKeys`!
   const keys: Method[] = getKeys(handler);
+
+  // sometimes we want to set up an array of allowed values: how do we take advantage of that in TS?
+  // right now, it's possible for these to get out of sync
+  type AllowedSuffix = "png" | "jpg" | "jpeg" | "svg";
+  const allowedSuffixes: AllowedSuffix[] = ["png", "jpg", "jpeg"];
+}
+
+/* ----------------------------- type utilities ------------------------ */
+{
+  // https://www.typescriptlang.org/docs/handbook/utility-types.html
+  type EntityType = "teacher" | "parent" | "school_leader" | "student";
+
+  // how do you type the return type by manipulating `EntityType`?
+  function isAdult(entityType: EntityType) {
+    return ["teacher", "parent", "school_leader"].includes(entityType);
+  }
+
+  function onlyTakesStudents(entityType: "student") {}
+
+  function doThing(entityType: EntityType) {
+    if (isAdult(entityType)) {
+      // do nothing
+    } else {
+      onlyTakesStudents(entityType);
+    }
+  }
+
+  // we often avoid using type utilities too much. If you have a type with lots of `Omit<X, y> & {z: true}`
+  // it can be hard to figure out what's going on
+  // and you end up with the same problem that we run into with splats
+}
+
+/* ----------------------------- function utilities ------------------------ */
+// https://www.typescriptlang.org/docs/handbook/utility-types.html Parameters, typeof, ReturnType
+
+type AnyFunction = (...args: any[]) => any;
+const createSpyFunctionPreservingTypes = <T extends AnyFunction>(fn: T) => {
+  let callCount = 0;
+
+  // add types here to make the spied functions share the same types as the passed in function
+  const spyFunction = (...args: any[]) => {
+    callCount++;
+    return fn(...args);
+  };
+
+  spyFunction.getCallCount = () => callCount;
+
+  return spyFunction;
+};
+
+const stringFunction = (key: string) => key;
+
+// this is erroring the way it should!
+stringFunction(1);
+
+const numberFunction = (n: number) => n;
+// same here! we want to see this error
+numberFunction("string");
+
+const spiedStringFunction = createSpyFunctionPreservingTypes(stringFunction);
+type SpyHint = typeof spiedStringFunction;
+
+// this should error! Our returned function should preserve the same types as the function we pass in
+spiedStringFunction(1);
+createSpyFunctionPreservingTypes(numberFunction)("string");
+
+// sometimes we don't have access to good types because of how we're importing things
+// how do we use type utilities to deal with that?
+
+type TimeoutRef = "fix me without importing any types :)";
+class HowCanWeGetTimeoutType {
+  private timeoutRef: TimeoutRef;
+
+  constructor() {
+    this.timeoutRef = setImmediate(() => {
+      console.log("well done!");
+    });
+  }
 }
 
 /* -------------------- NEXT LEVEL -------------------- */
