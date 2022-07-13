@@ -12,14 +12,14 @@
     "noUnusedLocals": false,
     "strict": true,
     "strictNullChecks": true,
+    "alwaysStrict": true,
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
     "lib": ["es2019"],
     "noErrorTruncation": true,
     "incremental": true,
-    "noImplicitAny": true,
-    "typeRoots": ["./typings", "./node_modules/@types"]
+    "noImplicitAny": true
   },
-  "include": ["katas.ts"],
+  "include": ["typescript-practice.ts"],
   "exclude": ["node_modules"]
 }

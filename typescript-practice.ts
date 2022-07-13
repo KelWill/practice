@@ -388,11 +388,11 @@ One other common case is the type for empty object -- it should look like `Recor
     key: UserConfigKey,
     value: boolean | Date
   ): Promise<UserConfig> {
-    return {} as UserConfig;
+    return { [key]: value } as UserConfig;
   }
 }
 
-/* ------------------------ typeof, keyof, in, extends --------------------- */
+/* ------------------------ typeof, keyof, in --------------------- */
 
 {
   const objectWithKeys = { a: 1, b: 2, c: [1, 2, 3] };
@@ -411,6 +411,25 @@ One other common case is the type for empty object -- it should look like `Recor
     PUT: () => 2,
     POST: () => 3,
   };
+}
+
+/* ----------------------------- generating types from arrays ------------------------ */
+{
+  // sometimes we want to set up an array of allowed values: how do we take advantage of that in TS?
+  // right now, it's possible for these to get out of sync
+  type AllowedSuffix = "png" | "jpg" | "jpeg" | "svg";
+  const allowedSuffixes: AllowedSuffix[] = ["png", "jpg", "jpeg"];
+}
+
+/* ----------------------------- why do we lose types with Object.keys, Object.values ------------------------ */
+{
+  const handler = {
+    GET: () => 1,
+    PUT: () => 2,
+    POST: () => 3,
+    DELETE: () => 4,
+  } as const;
+  type Method = keyof typeof handler;
 
   function getKeys(o: Record<string, unknown>) {
     return Object.keys(handler);
@@ -420,11 +439,22 @@ One other common case is the type for empty object -- it should look like `Recor
   // but `keys` isn't happy. How can we set up the return type of `getKeys` to preserve the type
   // note: we'll have to override typescript in `getKeys`!
   const keys: Method[] = getKeys(handler);
+}
 
-  // sometimes we want to set up an array of allowed values: how do we take advantage of that in TS?
-  // right now, it's possible for these to get out of sync
-  type AllowedSuffix = "png" | "jpg" | "jpeg" | "svg";
-  const allowedSuffixes: AllowedSuffix[] = ["png", "jpg", "jpeg"];
+/* ----------------------------- why don't we do [].filter(Boolean) ------------------------ */
+{
+  type Teacher = { title: string; name: string; _id: string };
+  const maybeTeachers: Array<Teacher | null | undefined> = [
+    { title: "Dr", name: "Skeletor", _id: "" },
+    undefined,
+    null,
+  ];
+  const teachers = maybeTeachers.filter(Boolean);
+  for (const teacher of teachers) {
+    console.log(teacher._id);
+  }
+
+  // typescript issue: https://github.com/microsoft/TypeScript/issues/16069
 }
 
 /* ----------------------------- type utilities ------------------------ */
@@ -455,6 +485,24 @@ One other common case is the type for empty object -- it should look like `Recor
 /* ----------------------------- function utilities ------------------------ */
 // https://www.typescriptlang.org/docs/handbook/utility-types.html Parameters, typeof, ReturnType
 
+// sometimes we don't have access to good types because of how we're importing things
+// how do we use type utilities to deal with that?
+
+type TimeoutRef = "fix me without importing any types :)";
+class HowCanWeGetTimeoutType {
+  private timeoutRef: TimeoutRef;
+
+  constructor() {
+    this.timeoutRef = setImmediate(() => {
+      console.log("well done!");
+    });
+  }
+}
+
+// We can modify JS/TS functions: binding them to different contexts, enabling currying, and lots more!
+// when we do that, we may need to do some work to ensure that our function preserves its types
+// spies/stubs are a relatively common example: we're setting up a new function that uses an existing function
+// how do we preserve our types?
 type AnyFunction = (...args: any[]) => any;
 const createSpyFunctionPreservingTypes = <T extends AnyFunction>(fn: T) => {
   let callCount = 0;
@@ -485,20 +533,6 @@ type SpyHint = typeof spiedStringFunction;
 // this should error! Our returned function should preserve the same types as the function we pass in
 spiedStringFunction(1);
 createSpyFunctionPreservingTypes(numberFunction)("string");
-
-// sometimes we don't have access to good types because of how we're importing things
-// how do we use type utilities to deal with that?
-
-type TimeoutRef = "fix me without importing any types :)";
-class HowCanWeGetTimeoutType {
-  private timeoutRef: TimeoutRef;
-
-  constructor() {
-    this.timeoutRef = setImmediate(() => {
-      console.log("well done!");
-    });
-  }
-}
 
 /* -------------------- NEXT LEVEL -------------------- */
 
