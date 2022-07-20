@@ -32,7 +32,6 @@ const method3 = "GET";
 doSomething({ method: method3 });
 
 /* ----------------------- array type inference ------------------------ */
-// shoutout to Chris for this section!!
 
 const mixedArray = ["string", 2];
 // why does this error?
@@ -75,6 +74,12 @@ type Dog = {
 const dog: Dog = { is_animal: true };
 const cat: Cat = dog;
 
+// functions care that you satisfy their constraints. It's often OK to pass in extra fields
+declare function takesAnimal(animal: { is_animal: true }): void;
+takesAnimal({ is_animal: true, barks: "yes" });
+const puppy = { is_animal: true as const, barks: "yes" };
+takesAnimal(puppy);
+
 /* ----------------------- what does 'as' do? ----------------------- */
 // every time you use "as" you're telling the type system "I KNOW BETTER THAN YOU DO"
 // and you normally don't!
@@ -89,6 +94,17 @@ takesGreeting(notHello);
 // using 'as' is dangerous!
 const notATeacher = {} as Teacher;
 
+// especially if you do `as unknown`
+const evenMoreNotATeacher = (false as unknown) as Teacher;
+
+/* -------------- narrowing a property that only exists on some types -------- */
+
+type WithProp = { withProp: "yay" };
+type WithoutProp = {};
+
+let maybeHasProp: WithProp | WithoutProp = { withProp: "yay" };
+console.log(maybeHasProp.withProp);
+
 /* ----------------------- narrowing ------------------------- */
 // https://www.typescriptlang.org/docs/handbook/2/narrowing.html
 // we don't always help typescript do type narrowing in our codebase
@@ -96,16 +112,24 @@ const notATeacher = {} as Teacher;
 // that's almost always a sign that we've screwed up our types somehow
 // in general, if you're often writing `as Y` or using `!`, you may not be narrowing types correctly
 
-type SchoolLeader = Teacher & { role: "school_leader" };
-// update this function to make the if statement narrow properly :) ("is")
-function isSchoolLeader(teacher: Teacher) {
-  return teacher.role === "school_leader";
+// when you have a shape where all of the objects share a distinct field with different values
+// you can use that to narrow the type!
+type Whale = { type: "whale"; planktonLover: true };
+type Dolphin = { type: "dolphin"; echolocate: () => 1 };
+type Porpoise = { type: "porpoise"; herring: "delicious" };
+
+function takesMarineMammal(marineMammal: Whale | Dolphin | Porpoise) {
+  if (marineMammal.type === "whale") {
+    return marineMammal.planktonLover;
+  }
+  if (marineMammal.type === "dolphin") {
+    return marineMammal.echolocate();
+  }
+
+  return marineMammal.herring;
 }
-const maybeSchoolLeader: Teacher = { type: "teacher", role: "school_leader" };
-if (isSchoolLeader(maybeSchoolLeader)) {
-  const schoolLeader: SchoolLeader = maybeSchoolLeader;
-  console.log("school_leader", schoolLeader);
-}
+
+// but things can get a bit more complex when you have a mix of fields with that type and without
 
 class NotFoundError extends Error {
   type: "NotFound";
@@ -157,6 +181,17 @@ function getResponseFromError(
   }
 
   throw new Error(`Unknown error type ${err.type}`);
+}
+
+type SchoolLeader = Teacher & { role: "school_leader" };
+// update this function to make the if statement narrow properly :) ("is")
+function isSchoolLeader(teacher: Teacher) {
+  return teacher.role === "school_leader";
+}
+const maybeSchoolLeader: Teacher = { type: "teacher", role: "school_leader" };
+if (isSchoolLeader(maybeSchoolLeader)) {
+  const schoolLeader: SchoolLeader = maybeSchoolLeader;
+  console.log("school_leader", schoolLeader);
 }
 
 /* ----------------------- typing functions to handle multiple input types ------------------------- */
