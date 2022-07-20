@@ -103,7 +103,14 @@ type WithProp = { withProp: "yay" };
 type WithoutProp = {};
 
 let maybeHasProp: WithProp | WithoutProp = { withProp: "yay" };
-console.log(maybeHasProp.withProp);
+if (maybeHasProp.withProp) {
+  console.log(maybeHasProp.withProp);
+}
+
+// this is how we often attempt to solve this & it's probably not the best way
+if ((maybeHasProp as WithProp).withProp) {
+  console.log((maybeHasProp as WithProp).withProp);
+}
 
 /* ----------------------- narrowing ------------------------- */
 // https://www.typescriptlang.org/docs/handbook/2/narrowing.html
