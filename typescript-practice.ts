@@ -239,6 +239,8 @@ const renderedParent1: RenderedParent = renderEntityWithMultipleFunctionDefiniti
   { type: "parent" }
 );
 
+console.log(renderedParent1, renderedTeacher1, teacher);
+
 // make sure this errors!
 renderEntityWithMultipleFunctionDefinitions({ type: "not an entity" });
 
