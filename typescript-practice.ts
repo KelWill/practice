@@ -205,38 +205,59 @@ if (isSchoolLeader(maybeSchoolLeader)) {
 // https://www.typescriptlang.org/docs/handbook/functions.html#overloads
 
 type Teacher = { type: "teacher"; role?: string };
+type RenderedTeacher = Teacher & {
+  firstName: string;
+  lastName: string;
+  title: string;
+};
 type Parent = { type: "parent" };
+type RenderedParent = Parent & {
+  firstName: string;
+  lastName: string;
+};
 type Entity = Teacher | Parent;
 
 // how do set up `renderEntity` to preserve the type of its input?
-function renderEntityWithGenerics<T extends Entity>(entity: Entity) {
+function reflectEntityWithGenererics(entity: Entity) {
   return entity;
 }
-const teacher: Teacher = renderEntityWithGenerics({ type: "teacher" });
+const teacher: Teacher = reflectEntityWithGenererics({ type: "teacher" });
 
 // make sure this errors!
-renderEntityWithGenerics({ type: "not an entity" });
+reflectEntityWithGenererics({ type: "not an entity" });
 
-// could you solve this without using generics and using multiple function definitions?
-function renderEntityWithMultipleDefinitions(entity: Entity) {
-  return entity;
+// how do set up `renderEntity` to preserve the type of its input?
+function renderEntityWithMultipleFunctionDefinitions(entity: Entity) {
+  return entity.type === "teacher"
+    ? { ...entity, firstName: "Doug", lastName: "Lemov", title: "Mr" }
+    : { ...entity, firstName: "Molly", lastName: "Weasley" };
 }
-const parent2: Parent = renderEntityWithMultipleDefinitions({ type: "parent" });
+const renderedTeacher1: RenderedTeacher = renderEntityWithMultipleFunctionDefinitions(
+  { type: "teacher" }
+);
+const renderedParent1: RenderedParent = renderEntityWithMultipleFunctionDefinitions(
+  { type: "parent" }
+);
 
 // make sure this errors!
-const notAnEntity = renderEntityWithMultipleDefinitions({
-  type: "not an entity",
-});
+renderEntityWithMultipleFunctionDefinitions({ type: "not an entity" });
 
-function swapStringsAndNumbers(a: string | number) {
-  if (typeof a === "string") return parseInt(a);
-  return a.toLocaleString();
+// how much do we need to worry about this in practice?
+function renderEntity(entity: Entity): RenderedTeacher | RenderedParent {
+  return entity.type === "teacher"
+    ? { ...entity, firstName: "Doug", lastName: "Lemov", title: "Mr" }
+    : { ...entity, firstName: "Molly", lastName: "Weasley" };
 }
-// how do we get n to autmoatically show up as a number? (don't use `as number`)
-const n: number = swapStringsAndNumbers("100");
-const s: string = swapStringsAndNumbers(1000);
+function doSomethingTeacherly(teacher: Teacher) {
+  const renderedTeacher = renderEntity(teacher);
+  if (renderedTeacher.type === "parent")
+    throw new Error("sacrifice to compiler");
+  console.log(renderedTeacher.title);
+}
+doSomethingTeacherly({} as Teacher);
 
 /* ----------------------- brands ------------------------- */
+// https://github.com/classdojo/api/blob/master/src/validators/emailAddress.ts
 // why would we want an "impossible" type like this EmailAddress?
 type EmailAddress = string & { __secret_brand: "email address" };
 function asEmail(emailAddress: string) {
@@ -483,6 +504,7 @@ One other common case is the type for empty object -- it should look like `Recor
   const keys: Method[] = getKeys(handler);
 }
 
+import * as _ from "lodash";
 /* ----------------------------- why don't we do [].filter(Boolean) ------------------------ */
 {
   type Teacher = { title: string; name: string; _id: string };
@@ -494,6 +516,26 @@ One other common case is the type for empty object -- it should look like `Recor
   const teachers = maybeTeachers.filter(Boolean);
   for (const teacher of teachers) {
     console.log(teacher._id);
+  }
+
+  const things = [1, 2, 3, 4, null, undefined];
+
+  const truthyThings1 = things.filter(Boolean);
+  for (const thing of truthyThings1) takesNumber(thing);
+
+  const truthyThings2 = things.filter((a) => a != null);
+  for (const thing of truthyThings2) takesNumber(thing);
+
+  const truthyThings3 = _.compact(things);
+  for (const thing of truthyThings3) takesNumber(thing);
+
+  const truthyThings4 = things.filter(isNotNullOrUndefined);
+  for (const thing of truthyThings4) takesNumber(thing);
+
+  function takesNumber(a: number) {}
+
+  function isNotNullOrUndefined<T>(x: T): x is NonNullable<T> {
+    return x != null;
   }
 
   // typescript issue: https://github.com/microsoft/TypeScript/issues/16069
