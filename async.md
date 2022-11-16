@@ -49,6 +49,7 @@ async function untilFinished(req) {}
 
 - knowing how to do this manually is important, but on the backend you do have access to https://nodejs.org/api/util.html#util_util_promisify_original
 
+
 ### convert promises based function to async/await
 
 ```js
@@ -97,6 +98,39 @@ const update = (properties: TeacherUpdatePayload) => {
     });
 };
 ```
+
+### when does promised work start?
+
+```js
+(function () {
+  function wait(ms) {
+    return new Promise((resolve) => {
+      setTimeout(resolve, ms);
+    });
+  }
+  async function doA() {
+    console.log("a1");
+    await wait(10);
+    console.log("a2");
+  }
+  async function doB() {
+    console.log("b1");
+    await wait(20);
+    console.log("b2");
+  }
+
+  async function main() {
+    console.log("main1");
+    const a = doA();
+    await doB();
+    console.log("main2");
+    await a;
+    console.log("main3");
+  }
+  main();
+})();
+```
+
 
 ### write a custom promise implementation
 
